@@ -18,35 +18,27 @@ const ports = process.env.PORT || 3000;
 
 
 const config={
-	user:"sa1",
-	password:"@quang12345",
-	server:"DESKTOP-2MKRUML\\KLIGHT",
-	database:"master",
+	user:"admin",
+	password:"admin",
+	server:"DESKTOP-D1R061H",
+	database:"bookstore",
 	port:1433,
 	options:{
 		trustServerCertificate:true
 	}
 }
-
+const appPool = new sql.ConnectionPool(config)
 app.use(morgan('common'));
 
 app.use(bodyParser.json());
 app.use(cors());
 
-app.use('/',async (req,res)=>{
-	try{
-		await sql.connect(config);
-		console.log("connect success")
-		res.send("db connected");
-	}catch(err){
-		console.log(err)
-	}
-})
-app.use('/images', express.static(path.join('images')));
+appPool.connect().then(function(pool) {
+	app.locals.db = pool;
+	const server = app.listen(3000, function () {
 
-
-app.listen(ports,()=>{
-	console.log("run port")
-})
-// app.use('/api/users', auth, userRoute);
-// app.use('/api/auth', authRoute);
+	  console.log('Example app listening at')
+	})
+  }).catch(function(err) {
+	console.error('Error creating connection pool', err)
+  });
