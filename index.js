@@ -19,9 +19,9 @@ const ports = process.env.PORT || 3000;
 
 
 const config={
-	user:"admin",
-	password:"admin",
-	server:"DESKTOP-D1R061H",
+	user:"sa1",
+	password:"@quang12345",
+	server:"DESKTOP-2MKRUML\\KLIGHT",
 	database:"bookstore",
 	port:1433,
 	options:{
@@ -45,3 +45,5 @@ appPool.connect().then(function(pool) {
   }).catch(function(err) {
 	console.error('Error creating connection pool', err)
   });
+
+  app.use('/images/full',express.static(path.join('images/full')))
