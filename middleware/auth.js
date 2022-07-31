@@ -14,6 +14,7 @@ const verifyToken = (req, res, next) => {
 			.send('A token is required for authentication');
 	}
 	try {
+		console.log("some");
 		const decoded = jwt.verify(token, config.TOKEN_KEY);
 		console.log(decoded);
 		req.user = decoded;

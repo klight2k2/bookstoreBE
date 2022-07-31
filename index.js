@@ -6,10 +6,8 @@ const express = require('express');
 const cors = require('cors');
 var morgan = require('morgan');
 
-const authRoute = require('./routes/authRoute');
-const bookRoute = require('./routes/bookRoute');
-const userRoute = require('./routes/userRoute');
-const auth = require('./middleware/auth');
+const route = require('./routes/index');
+
 const app = express();
 
 const sql=require("mssql")
@@ -19,9 +17,9 @@ const ports = process.env.PORT || 3000;
 
 
 const config={
-	user:"sa1",
-	password:"@quang12345",
-	server:"DESKTOP-2MKRUML\\KLIGHT",
+	user:"admin",
+	password:"admin",
+	server:"DESKTOP-D1R061H",
 	database:"bookstore",
 	port:1433,
 	options:{
@@ -33,9 +31,13 @@ app.use(morgan('common'));
 
 app.use(bodyParser.json());
 app.use(cors());
-app.use('/api',authRoute)
-app.use('/api',bookRoute)
-
+// app.use(function(req, res, next) {
+// 	res.header("Access-Control-Allow-Origin", "*");
+// 	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+// 	next();
+//   });
+// route(app)
+app.use('/api',route)
 appPool.connect().then(function(pool) {
 	app.locals.db = pool;
 	const server = app.listen(3000, function () {
@@ -46,4 +48,4 @@ appPool.connect().then(function(pool) {
 	console.error('Error creating connection pool', err)
   });
 
-  app.use('/images/full',express.static(path.join('images/full')))
+  app.use('/images/books',express.static(path.join('images/books')))

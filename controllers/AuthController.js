@@ -6,7 +6,6 @@ const sql = require('mssql');
 class AuthController {
 	async login(req, res) {
 		const pool=req.app.locals.db
-		console.log(req);
 		await pool.request().input('email',sql.VarChar,req.body.email)
 		.query('SELECT * FROM [User] where email=@email ', function(err, recordset) {
 			if (err) {
@@ -17,7 +16,6 @@ class AuthController {
 			// if(recordset.)
 			const user=recordset.recordset[0];
 			if(!user){
-				console.log(user);
 				res.status(500).json("Email isn't exist!");
 				return;
 			}
@@ -34,7 +32,6 @@ class AuthController {
 				res.status(200).json({ message: 'success',token:token,user:{id:user.id,email:user.email,name:user.fullname,role:user.role_id} });
 				return;
 			}
-			console.log(user);
 			res.status(500).json({message:"Password is invalid"})
 			return;
 		  })
@@ -58,7 +55,6 @@ class AuthController {
 			 if(!req.body.role_id || req.body.role_id!=2)req.body.role_id=1;
 			const query=`INSERT INTO [User] ([fullname],[DOB],[email],[phone_number],[address],[password],[role_id]) VALUES
 							(N'${req.body.fullname}','${req.body.dob}',N'${req.body.email}',N'${req.body.phone_number}',N'${req.body.address}',N'${req.body.password}',${req.body.role_id});`
-							console.log(query);
 				pool.query(query,(err,result)=>{
 					try{
 						if(err) res.status(500).json("CAN'T NOT CREATE USER");

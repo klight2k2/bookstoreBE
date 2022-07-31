@@ -1,13 +1,12 @@
 const router = require('express').Router();
 const userController = require('../controllers/UserController');
+const auth=require('../middleware/auth')
 const storage = require('../middleware/storage');
 
-router.get('/findall', userController.findAll);
-router.delete('/:id/delete', userController.delete);
-router.get('/:id/find', userController.find);
+router.post('/orders', auth,userController.orders);
+
 //update user
 // delete user
 // get a user
-router.put('/:id', storage, userController.update);
 
 module.exports = router;
