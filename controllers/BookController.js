@@ -94,14 +94,15 @@ class BookController{
     async getAll(req,res){
         const pool=req.app.locals.db;
         try{
-            const getAll=`SELECT Book.id,Book.title,Book.description,Book.image,Book.price,Author.[name] as author,Publisher.[name] as publisher FROM Book,Author,Publisher 
-            where Book.author_id=Author.id
+            const getAll=`SELECT Book.id,Book.title,Book.description,Book.image,Book.price,Author.[name] as author,Publisher.[name] as publisher FROM Book,Author,Publisher,AuthorBook 
+            where  Book.id=AuthorBook.book_id
+            AND Author.id=AuthorBook.author_id
             AND Publisher.id=Book.publisher_id`
             pool.query(getAll,(err,recordset)=>{
                 if(err){
                     res.status(500).json({message:"SERVER ERROR"});
                 }
-                res.status(200).send(recordset.recordset);
+                res.status(200).send(recordset?.recordset);
 
             })
 
@@ -111,9 +112,11 @@ class BookController{
     async searchByTitle(req,res){
         const pool=req.app.locals.db;
         try{
-            const searchByTitle=`SELECT *,Author.[name] as author,Publisher.[name] as publisher FROM Book,Author,Publisher 
+            const searchByTitle=`SELECT *,Author.[name] as author,Publisher.[name] as publisher FROM Book,Author,Publisher,AuthorBook
             where Book.title like N'%${req.body.bookTitle}%'
-            AND Book.author_id=Author.id
+
+            AND  Book.id=AuthorBook.book_id
+            AND Author.id=AuthorBook.author_id
             AND Publisher.id=Book.publisher_id`
             pool.query(searchByTitle,(err,recordset)=>{
                 if(err){
@@ -153,17 +156,21 @@ class BookController{
     }}
     async searchBookAdvance(req,res){
         const pool=req.app.locals.db;
-        if(!req.body.selectedCategoriesId)  return res.status(200).json({code:500,message:"Không tìm thấy quyển sách nào như vậy!"});
+        if(!req.body.selectedCategoriesId)  {
+            console.log("êrr");
+            return res.status(200).json({code:500,message:"Không tìm thấy quyển sách nào như vậy!"});}
+
         let {bookName,authorName,maxPrice,minPrice,selectedCategoriesId,selectedPublisherId}={...req.body};
         console.log(bookName,authorName,maxPrice,minPrice,selectedCategoriesId,selectedPublisherId)
         selectedCategoriesId=selectedCategoriesId.join(",");
+
         try{
                 const searchBook=`SELECT *,Author.[name] as author FROM Book
                 JOIN AuthorBook ON Book.id = AuthorBook.book_id
                 JOIN BookCategory ON Book.id = BookCategory.book_id
                 JOIN Author ON Author.id = AuthorBook.author_id
                  WHERE (Author.name LIKE N'%${authorName}%')
-                 AND (category_id in (${selectedCategoriesId}$$))
+                 AND (category_id in (${selectedCategoriesId}))
                 AND (publisher_id = ${selectedPublisherId})
                 AND (title LIKE N'%${bookName}%')
                 AND (price >= ${minPrice} AND price <= ${maxPrice})`
@@ -172,9 +179,10 @@ class BookController{
                                     if(err){
                                         console.log(err);
                                         if(recordset?.recordset?.length==0) return res.status(200).json({code:200,message:"Không tìm thấy quyển sách nào như vậy!"});
-                                        res.status(500).json({message:"SERVER ERROR"});
+                                        return res.status(200).json({code:500,message:"Không tìm thấy quyển sách nào như vậy!"});
                                     }
                                     console.log(recordset);
+                                    if(recordset?.recordset?.length==0) return res.status(200).json({code:500,message:"Không tìm thấy quyển sách nào như vậy!"});
                                     res.status(200).send(recordset?.recordset);
 
                                 })

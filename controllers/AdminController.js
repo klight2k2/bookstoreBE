@@ -17,11 +17,7 @@ class AdminController {
 					await transaction.begin()
 					const request = new sql.Request(transaction)
 					const image =req.file.filename; // Note: set path dynamically
-					console.log(`
-					INSERT INTO Book(title, price, description, image, publisher_id, pages, quantity)
-					VALUES (N'${req.body.title}',${req.body.price},N'${req.body.description}',N'${image}', ${req.body.publisher},${req.body.pages},${req.body.quantity})
-					
-					`);
+				
 					const book=await request.query(`
 					INSERT INTO Book(title, price, description, image, publisher_id, pages, quantity)
 					VALUES (N'${req.body.title}',${req.body.price},N'${req.body.description}',N'${image}', ${req.body.publisher},${req.body.pages},${req.body.quantity});
@@ -293,12 +289,11 @@ class AdminController {
 	async cancelOrder(req,res){
 		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
         const pool=req.app.locals.db;
+		console.log("hello");
+		const order_id=req.body.order_id;
+		console.log("ORDER NAY",req.body);
         try{
-			const order_id=parseInt(req.body.order_id);
-			console.log(order_id);
-
             const order=await pool.query(`select * from [Orders] where id=${order_id}`);
-			console.log(order);
 			if(order.recordset.length<=0 || order.recordset[0].status_id==4){
 				return res.status(500).json({message:"Đơn hàng đã bị hủy"});
 			}
@@ -338,62 +333,62 @@ class AdminController {
         }
     }
 
-	async getPurchase(req,res){
-		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
-        const pool=req.app.locals.db;
-        try{
-			const user_id=req.user.id;
-			console.log(user_id);
-            const ordersDetail=await pool.query(`select * from [Order_Book_User] where user_id=${user_id} order by order_date desc`);
-            let ordersInfo=await pool.query(`select * from [Orders_status] where user_id=${user_id} order by order_date desc`);
-			ordersInfo=ordersInfo.recordset.map(orderInfo=>({...orderInfo,ordersDetail:[]}));
+	// async getPurchase(req,res){
+	// 	if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
+    //     const pool=req.app.locals.db;
+    //     try{
+	// 		const user_id=req.user.id;
+	// 		console.log(user_id);
+    //         const ordersDetail=await pool.query(`select * from [Order_Book_User] where user_id=${user_id} order by order_date desc`);
+    //         let ordersInfo=await pool.query(`select * from [Orders_status] where user_id=${user_id} order by order_date desc`);
+	// 		ordersInfo=ordersInfo.recordset.map(orderInfo=>({...orderInfo,ordersDetail:[]}));
 
-			ordersDetail.recordset.map(
-				(orderDetail)=>{
-					ordersInfo.map((orderInfo,index)=>{
+	// 		ordersDetail.recordset.map(
+	// 			(orderDetail)=>{
+	// 				ordersInfo.map((orderInfo,index)=>{
 						
-						if(orderInfo.order_id== orderDetail.order_id) {
-							const reduceOrderDetail={book_id:orderDetail.book_id,price:orderDetail.price,title:orderDetail.title,image:orderDetail.image,author:orderDetail.author,num:orderDetail.num};
-							orderInfo.ordersDetail.push(reduceOrderDetail);
-						}
-					})
-				}
-			)
-				return res.status(200).json(ordersInfo);
+	// 					if(orderInfo.order_id== orderDetail.order_id) {
+	// 						const reduceOrderDetail={book_id:orderDetail.book_id,price:orderDetail.price,title:orderDetail.title,image:orderDetail.image,author:orderDetail.author,num:orderDetail.num};
+	// 						orderInfo.ordersDetail.push(reduceOrderDetail);
+	// 					}
+	// 				})
+	// 			}
+	// 		)
+	// 			return res.status(200).json(ordersInfo);
 
-        }catch(err){
-            console.log(err);
-            return res.status(500).json({message:"SERVER ERROR"})
-        }
-    }
-	async cancelOrder(req,res){
-        const pool=req.app.locals.db;
-        try{
-			const user_id=parseInt(req.user.id);
-			const order_id=parseInt(req.body.order_id);
-			console.log(order_id);
+    //     }catch(err){
+    //         console.log(err);
+    //         return res.status(500).json({message:"SERVER ERROR"})
+    //     }
+    // }
+	// async cancelOrder(req,res){
+    //     const pool=req.app.locals.db;
+    //     try{
+	// 		const user_id=parseInt(req.user.id);
+	// 		const order_id=parseInt(req.body.order_id);
+	// 		console.log(order_id);
 
-            const order=await pool.query(`select * from [Orders] where id=${order_id} and user_id=${user_id}`);
-			console.log(order);
-			if(order.recordset.length<=0 || order.recordset[0].status_id==4){
-				return res.status(500).json({message:"Đơn hàng đã bị hủy"});
-			}
-            await pool.query(`update [Orders] set status_id=4 where id=${order_id}`);
-			let ordersDetail= await pool.query(`select * from [Orders_Detail] where order_id=${order_id}`);
-			ordersDetail=ordersDetail.recordset;
-			for (let i=0 ;i<ordersDetail.length ;i++) {
-				const orderDetail=ordersDetail[i]
-				await pool.query(`update [Book] set quantity=quantity+${orderDetail.num} where id=${orderDetail.book_id}`)
+    //         const order=await pool.query(`select * from [Orders] where id=${order_id} and user_id=${user_id}`);
+	// 		console.log(order);
+	// 		if(order.recordset.length<=0 || order.recordset[0].status_id==4){
+	// 			return res.status(500).json({message:"Đơn hàng đã bị hủy"});
+	// 		}
+    //         await pool.query(`update [Orders] set status_id=4 where id=${order_id}`);
+	// 		let ordersDetail= await pool.query(`select * from [Orders_Detail] where order_id=${order_id}`);
+	// 		ordersDetail=ordersDetail.recordset;
+	// 		for (let i=0 ;i<ordersDetail.length ;i++) {
+	// 			const orderDetail=ordersDetail[i]
+	// 			await pool.query(`update [Book] set quantity=quantity+${orderDetail.num} where id=${orderDetail.book_id}`)
 
-			}
+	// 		}
 		
-				return res.status(200).json({code:200,message:"Hủy đơn hàng thành công"});
+	// 			return res.status(200).json({code:200,message:"Hủy đơn hàng thành công"});
 
-        }catch(err){
-            console.log(err);
-            return res.status(500).json({message:"SERVER ERROR"})
-        }
-    }
+    //     }catch(err){
+    //         console.log(err);
+    //         return res.status(500).json({message:"SERVER ERROR"})
+    //     }
+    // }
 
 
 }

@@ -9,6 +9,7 @@ class UserController {
 				let total_money=0;
 				const ordersId=req.body.orders.map(order=>order.id).join(",");
 				const orders=req.body.orders.sort((a,b)=>a.id-b.id);
+				console.log(req.body.orders);
 				const books=await pool.query(`SELECT * FROM Book WHERE Book.id in (${ordersId})`)
 				const check=books.recordset.sort((a,b)=>a.id-b.id).every((book,index)=>{
 					total_money+=orders[index].num*book.price;
