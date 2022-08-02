@@ -57,9 +57,9 @@ class AuthController {
 							(N'${req.body.fullname}','${req.body.dob}',N'${req.body.email}',N'${req.body.phone_number}',N'${req.body.address}',N'${req.body.password}',${req.body.role_id});`
 				pool.query(query,(err,result)=>{
 					try{
-						if(err) res.status(500).json("CAN'T NOT CREATE USER");
+						if(err) res.status(500).json("Cant't register user!");
 						console.log(result)
-						return res.status(200).json({result})
+						return res.status(200).json({code:200,message:"Register successfully!"})
 						}catch(e){
 							console.log(e);
 						}
