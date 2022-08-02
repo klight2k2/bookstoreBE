@@ -52,9 +52,11 @@ class AuthController {
 				res.status(500).json("Email already exists");
 				return;
 			}
+			console.log(req.body.sex=='male');
+			if(req.body.sex !=='female' && req.body.sex!=='male') return res.status(500).json({message:"register failed!"});
 			 if(!req.body.role_id || req.body.role_id!=2)req.body.role_id=1;
-			const query=`INSERT INTO [User] ([fullname],[DOB],[email],[phone_number],[address],[password],[role_id]) VALUES
-							(N'${req.body.fullname}','${req.body.dob}',N'${req.body.email}',N'${req.body.phone_number}',N'${req.body.address}',N'${req.body.password}',${req.body.role_id});`
+			const query=`INSERT INTO [User] ([fullname],[sex],[DOB],[email],[phone_number],[address],[password],[role_id]) VALUES
+							(N'${req.body.fullname}','${req.body.sex}','${req.body.dob}',N'${req.body.email}',N'${req.body.phone_number}',N'${req.body.address}',N'${req.body.password}',${req.body.role_id});`
 				pool.query(query,(err,result)=>{
 					try{
 						if(err) res.status(500).json("Cant't register user!");
