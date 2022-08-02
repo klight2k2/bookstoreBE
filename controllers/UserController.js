@@ -52,7 +52,7 @@ class UserController {
 							
 							console.log("Transaction committed.")
 						})
-						return res.status(200).json({message:"Đặt hàng thành công"});
+						return res.status(200).json({code:200,message:"Đặt hàng thành công"});
 					}catch(err){
 						console.log(err);
 						transaction.rollback()

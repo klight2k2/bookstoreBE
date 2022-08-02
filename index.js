@@ -17,9 +17,9 @@ const ports = process.env.PORT || 3000;
 
 
 const config={
-	user:"sa1",
-	password:"@quang12345",
-	server:"DESKTOP-2MKRUML\\KLIGHT",
+	user:"admin",
+	password:"admin",
+	server:"DESKTOP-D1R061H",
 	database:"bookstore",
 	port:1433,
 	options:{
