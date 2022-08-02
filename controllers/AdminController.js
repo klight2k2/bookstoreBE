@@ -1,41 +1,65 @@
 const sql = require('mssql');
 
 class AdminController {
+	checkAdmin(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
+	}
 	async addBook(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
             // if(req?.user?.role_id!=2) return res.status(500).json({message:"You are not allowed to access this page"});
 			const pool=req.app.locals.db;
-			// try{
-			// 	const transaction=new sql.Transaction(pool)
-			// 	try{
+			console.log(req.file);
+			console.log();
+			try{
+				const transaction=new sql.Transaction(pool)
+				try{
 					
-			// 		await transaction.begin()
-			// 		const request = new sql.Request(transaction)
-			// 		const image =req.file; // Note: set path dynamically
-			// 		await request
-			// 		.query(`
-			// 		INSERT INTO Book(title, price, description, image, publisher_id, pages, quantity)
-			// 		VALUES (N'${book.title}',${book.price},N'${book.description},N'${image}, ${publisher_id},${book.pages},${book.quantity})
+					await transaction.begin()
+					const request = new sql.Request(transaction)
+					const image =req.file.filename; // Note: set path dynamically
+					console.log(`
+					INSERT INTO Book(title, price, description, image, publisher_id, pages, quantity)
+					VALUES (N'${req.body.title}',${req.body.price},N'${req.body.description}',N'${image}', ${req.body.publisher},${req.body.pages},${req.body.quantity})
 					
-			// 		`)
-			// 		transaction.commit(err => {
-			// 			// ... error checks
-			// 			console.log(err);
-			// 			console.log("Transaction committed.")
-			// 		})
-			// 		return res.status(200).json({code:200,message:"Update user success!"});
-			// 	}catch(err){
-			// 		console.log(err);
-			// 		transaction.rollback()
-			// 		return res.status(500).json({code:500,message:"Something went wrong!"});
-			// 	}
+					`);
+					const book=await request.query(`
+					INSERT INTO Book(title, price, description, image, publisher_id, pages, quantity)
+					VALUES (N'${req.body.title}',${req.body.price},N'${req.body.description}',N'${image}', ${req.body.publisher},${req.body.pages},${req.body.quantity});
+					(SELECT SCOPE_IDENTITY() AS [SCOPE_IDENTITY]);	
+					`)
+					const book_id=book.recordset[0].SCOPE_IDENTITY;
+					await request.query(`insert into [AuthorBook]
+					values (${req.body.author_id},${book_id})
+					`);
+					const listCategoryId=req.body.category_id.split(',').map(item=>{
+						const category_id=parseInt(item);
+						return `(${book_id},${category_id}),`;
+					}).join('').slice(0,-1);
+					await request.query(`insert into [BookCategory]
+					values ${listCategoryId}
+					`);
+					
+					console.log(book);
+					transaction.commit(err => {
+						// ... error checks
+						console.log(err);
+						console.log("Transaction committed.")
+					})
+					return res.status(200).json({code:200,message:"Update user success!"});
+				}catch(err){
+					console.log(err);
+					transaction.rollback()
+					return res.status(500).json({code:500,message:"Something went wrong!"});
+				}
 					
 	
-			// }catch(err){
-			// 	console.log(err);
-			// 	return res.status(500).json({message:"SERVER ERROR"})
-			// }
+			}catch(err){
+				console.log(err);
+				return res.status(500).json({message:"SERVER ERROR"})
+			}
 	}
 	async getUsers(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
             // if(req?.user?.role_id!=2) return res.status(500).json({message:"You are not allowed to access this page"});
 			const pool=req.app.locals.db;
 			try{
@@ -50,6 +74,7 @@ class AdminController {
 			}
 	}
 	async getAuthors(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
             // if(req?.user?.role_id!=2) return res.status(500).json({message:"You are not allowed to access this page"});
 			const pool=req.app.locals.db;
 			try{
@@ -64,6 +89,7 @@ class AdminController {
 			}
 	}
 	async updateUser(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
             // if(req?.user?.role_id!=2) return res.status(500).json({message:"You are not allowed to access this page"});
 			const pool=req.app.locals.db;
 			console.log(req.body)
@@ -116,6 +142,7 @@ class AdminController {
 	}
 
 	async deleteBook(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
             // if(req?.user?.role_id!=2) return res.status(500).json({message:"You are not allowed to access this page"});
 			const book_id=req.body.book_id;
 			console.log(book_id, "hello");
@@ -146,6 +173,7 @@ class AdminController {
 	}
 
 	async deleteUser(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
             // if(req?.user?.role_id!=2) return res.status(500).json({message:"You are not allowed to access this page"});
 			const user_id=req.body.user_id;
 			console.log(user_id);
@@ -175,6 +203,7 @@ class AdminController {
 	}
 
 	async createUser(req, res) {
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
 		const pool=req.app.locals.db
 		console.log(req.body);
 		req.body.role_id=parseInt(req.body.role_id);
@@ -215,6 +244,7 @@ class AdminController {
 	}
 
     async getAll(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
         const pool=req.app.locals.db;
         try{
             const getAll=`SELECT Book.id,Book.title,Book.quantity,Book.description,Book.image,Book.price,Publisher.[name] as publisher FROM Book,Publisher 
@@ -230,8 +260,86 @@ class AdminController {
     }catch(err){
         return null;
     }}
+    async getOrders(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
+        const pool=req.app.locals.db;
+        try{
+			const user_id=req.user.id;
+			console.log(user_id);
+            const ordersDetail=await pool.query(`select * from [Order_Book_User]  order by order_date desc`);
+            let ordersInfo=await pool.query(`select * from [Orders_status]  order by order_date desc`);
+			ordersInfo=ordersInfo.recordset.map(orderInfo=>({...orderInfo,ordersDetail:[],email:''}));
+
+			ordersDetail.recordset.map(
+				(orderDetail)=>{
+					ordersInfo.map((orderInfo,index)=>{
+						
+						if(orderInfo.order_id== orderDetail.order_id) {
+							orderInfo.email=orderDetail.email
+							const reduceOrderDetail={book_id:orderDetail.book_id,price:orderDetail.price,title:orderDetail.title,image:orderDetail.image,author:orderDetail.author,num:orderDetail.num};
+							orderInfo.ordersDetail.push(reduceOrderDetail);
+						}
+					})
+				}
+			)
+				return res.status(200).json(ordersInfo);
+
+        }catch(err){
+            console.log(err);
+            return res.status(500).json({message:"SERVER ERROR"})
+        }
+    }
+
+	async cancelOrder(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
+        const pool=req.app.locals.db;
+        try{
+			const order_id=parseInt(req.body.order_id);
+			console.log(order_id);
+
+            const order=await pool.query(`select * from [Orders] where id=${order_id}`);
+			console.log(order);
+			if(order.recordset.length<=0 || order.recordset[0].status_id==4){
+				return res.status(500).json({message:"Đơn hàng đã bị hủy"});
+			}
+            await pool.query(`update [Orders] set status_id=4 where id=${order_id}`);
+			let ordersDetail= await pool.query(`select * from [Orders_Detail] where order_id=${order_id}`);
+			ordersDetail=ordersDetail.recordset;
+			for (let i=0 ;i<ordersDetail.length ;i++) {
+				const orderDetail=ordersDetail[i]
+				await pool.query(`update [Book] set quantity=quantity+${orderDetail.num} where id=${orderDetail.book_id}`)
+			}
+		
+				return res.status(200).json({code:200,message:"Hủy đơn hàng thành công"});
+
+        }catch(err){
+            console.log(err);
+            return res.status(500).json({message:"SERVER ERROR"})
+        }
+    }
+	async updateStatus(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
+        const pool=req.app.locals.db;
+        try{
+			const order_id=parseInt(req.body.order_id);
+			const status=parseInt(req.body.status);
+
+            const order=await pool.query(`select * from [Orders] where id=${order_id}`);
+			console.log(order);
+			if(order.recordset.length<=0 || order.recordset[0].status_id==4){
+				return res.status(500).json({message:"Đơn hàng đã bị hủy"});
+			}
+            await pool.query(`update [Orders] set status_id=${status} where id=${order_id}`);
+			return res.status(200).json({code:200,message:"Thay đổi trạng thái đơn hàng thành công"});
+
+        }catch(err){
+            console.log(err);
+            return res.status(500).json({message:"SERVER ERROR"})
+        }
+    }
 
 	async getPurchase(req,res){
+		if(req.user.role!==2) return res.status(500).json({code:500,message:"Bạn không phải admin!"})
         const pool=req.app.locals.db;
         try{
 			const user_id=req.user.id;
