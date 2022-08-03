@@ -41,7 +41,7 @@ class AdminController {
 						console.log(err);
 						console.log("Transaction committed.")
 					})
-					return res.status(200).json({code:200,message:"Update user success!"});
+					return res.status(200).json({code:200,message:"Add book successfully!"});
 				}catch(err){
 					console.log(err);
 					transaction.rollback()

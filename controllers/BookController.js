@@ -158,7 +158,7 @@ class BookController{
         const pool=req.app.locals.db;
         if(!req.body.selectedCategoriesId)  {
             console.log("êrr");
-            return res.status(200).json({code:500,message:"Không tìm thấy quyển sách nào như vậy!"});}
+            return res.status(500).json({code:500,message:"Không tìm thấy quyển sách nào như vậy!"});}
 
         let {bookName,authorName,maxPrice,minPrice,selectedCategoriesId,selectedPublisherId}={...req.body};
         console.log(bookName,authorName,maxPrice,minPrice,selectedCategoriesId,selectedPublisherId)
@@ -179,7 +179,7 @@ class BookController{
                                     if(err){
                                         console.log(err);
                                         if(recordset?.recordset?.length==0) return res.status(200).json({code:200,message:"Không tìm thấy quyển sách nào như vậy!"});
-                                        return res.status(200).json({code:500,message:"Không tìm thấy quyển sách nào như vậy!"});
+                                        return res.status(500).json({code:500,message:"Không tìm thấy quyển sách nào như vậy!"});
                                     }
                                     console.log(recordset);
                                     if(recordset?.recordset?.length==0) return res.status(200).json({code:500,message:"Không tìm thấy quyển sách nào như vậy!"});
