@@ -10,13 +10,13 @@ class AuthController {
 		.query('SELECT * FROM [User] where email=@email ', function(err, recordset) {
 			if (err) {
 			  console.error(err)
-			  res.status(500).send('SERVER ERROR')
+			  res.status(200).send('SERVER ERROR')
 			  return;
 			}
 			// if(recordset.)
 			const user=recordset.recordset[0];
 			if(!user){
-				res.status(500).json("Email isn't exist!");
+				res.status(500).json({code:500,message:"Email isn't exist!"});
 				return;
 			}
 			if(user.password === req.body.password){
@@ -29,10 +29,10 @@ class AuthController {
 						expiresIn: '2h',
 					}
 				);
-				res.status(200).json({ message: 'success',token:token,user:{id:user.id,email:user.email,name:user.fullname,role:user.role_id} });
+				res.status(200).json({code:200, message: 'login successfully',token:token,user:{id:user.id,email:user.email,name:user.fullname,role:user.role_id} });
 				return;
 			}
-			res.status(500).json({message:"Password is invalid"})
+			res.status(500).json({code:500,message:"Password is invalid"})
 			return;
 		  })
 	}
